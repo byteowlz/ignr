@@ -1,0 +1,31 @@
+# Docker
+
+# Docker Compose override files
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Docker build context
+.docker/
+
+# Secrets (never commit these)
+secrets/
+*.pem
+*.key
+
+# Docker volumes data (if mounted locally)
+data/
+volumes/
+
+# Temporary files
+tmp/
+temp/
+
+# Logs
+logs/
+*.log

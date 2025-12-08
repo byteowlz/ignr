@@ -1,0 +1,92 @@
+# PHP
+
+# Composer
+/vendor/
+composer.phar
+composer.lock
+
+# PHPUnit
+.phpunit.result.cache
+.phpunit.cache/
+phpunit.xml
+
+# PHP CS Fixer
+.php-cs-fixer.cache
+.php_cs.cache
+
+# PHPStan
+.phpstan/
+
+# Psalm
+.psalm/
+
+# Infection
+infection.log
+
+# PHPMD
+phpmd.xml
+
+# Laravel
+/bootstrap/cache/
+/storage/*.key
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+!.gitkeep
+.env
+.env.backup
+.env.production
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+
+# Symfony
+/var/
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/vendor/
+
+# WordPress
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/cache/
+wp-content/backup-db/
+wp-content/backups/
+wp-content/blogs.dir/
+wp-content/advanced-cache.php
+wp-content/wp-cache-config.php
+sitemap.xml
+sitemap.xml.gz
+*.log
+
+# Drupal
+sites/*/files
+sites/*/private
+sites/*/settings.local.php
+
+# CodeIgniter
+application/logs/*
+!application/logs/index.html
+application/cache/*
+!application/cache/index.html
+
+# Yii
+assets/*
+protected/runtime/*
+themes/classic/views/
+
+# CakePHP
+/tmp
+/logs
+/vendor
+
+# Magento
+/media/*
+!/media/.htaccess
+/var/*
+!/var/.htaccess

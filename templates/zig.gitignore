@@ -1,0 +1,23 @@
+# Zig
+
+# Build artifacts
+zig-out/
+zig-cache/
+/release/
+/debug/
+
+# Compiled outputs
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.lib
+*.exe
+
+# Documentation
+/docs/
+
+# IDE
+.vscode/
+.idea/

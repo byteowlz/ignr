@@ -1,0 +1,46 @@
+# Elixir
+
+# Build artifacts
+/_build/
+/cover/
+/deps/
+/doc/
+/.fetch
+erl_crash.dump
+*.ez
+*.beam
+
+# Generated on crash by the VM
+erl_crash.dump
+
+# Static artifacts
+/node_modules/
+/assets/node_modules/
+
+# Phoenix
+/priv/static/assets/
+/priv/static/cache_manifest.json
+
+# Files matching config/*.secret.exs pattern
+/config/*.secret.exs
+/config/prod.secret.exs
+
+# LiveView
+/.elixir_ls/
+/.lexical/
+
+# Mix
+*.plt
+*.plt.hash
+
+# Database
+*.db
+*.db-journal
+
+# Environment
+.env
+.envrc
+
+# Dialyzer
+/priv/plts/
+dialyzer.plt

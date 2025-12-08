@@ -1,0 +1,40 @@
+# Example configuration for ignr
+# Copy this file to $XDG_CONFIG_HOME/ignr/config.toml and adjust as needed.
+# Auto-detect languages/tools and generate .gitignore files
+
+[templates]
+# Local directory containing custom .gitignore templates
+# Each template should be named <name>.gitignore (e.g., rust.gitignore)
+# template_dir = "~/.config/ignr/templates"
+
+# Remote URL to fetch templates from (gitignore.io compatible API)
+# Used by the `sync` command to download templates
+template_url = "https://www.toptal.com/developers/gitignore/api"
+
+# Whether to prefer local/custom templates over embedded ones
+# When true, checks template_dir and cache before using built-in templates
+prefer_local = true
+
+# Templates to always include in generated .gitignore
+# Useful for always adding OS or editor patterns
+# always_include = ["macos", "vscode"]
+
+[detection]
+# Maximum directory depth to scan for technology detection
+max_depth = 10
+
+# Whether to auto-detect OS and add OS-specific patterns
+# Adds linux/macos/windows based on the current platform
+detect_os = true
+
+# Whether to detect IDE/editor directories and add patterns
+# Detects .vscode, .idea, .vim, .emacs.d directories
+detect_ide = true
+
+[paths]
+# Override the data directory (defaults to XDG_DATA_HOME/ignr)
+# Templates synced from remote are stored here
+# data_dir = "~/.local/share/ignr"
+
+# Override the cache directory (defaults to XDG_CACHE_HOME/ignr)
+# cache_dir = "~/.cache/ignr"

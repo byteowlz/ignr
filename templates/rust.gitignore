@@ -1,0 +1,30 @@
+# Rust
+
+# Generated files
+/target/
+**/*.rs.bk
+
+# Cargo.lock for libraries (uncomment if this is a library)
+# Cargo.lock
+
+# Debug files
+*.pdb
+
+# Profiling
+perf.data
+perf.data.old
+flamegraph.svg
+
+# Coverage
+*.profraw
+*.profdata
+lcov.info
+coverage/
+tarpaulin-report.html
+
+# Benchmarks
+criterion/
+
+# IDE/Editor specific (Rust)
+.cargo/
+!.cargo/config.toml

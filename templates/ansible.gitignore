@@ -1,0 +1,43 @@
+# Ansible
+
+# Retry files
+*.retry
+
+# Vault password files
+.vault_pass
+.vault_pass.txt
+vault_password_file
+
+# Inventory files with sensitive data
+inventory/production
+inventory/staging
+hosts
+
+# Variable files with sensitive data
+group_vars/all/vault.yml
+group_vars/*/vault.yml
+host_vars/*/vault.yml
+
+# SSH keys
+*.pem
+*.key
+id_rsa
+id_ed25519
+
+# Molecule
+.molecule/
+.cache/
+
+# Collections
+collections/ansible_collections/
+
+# Galaxy
+*.tar.gz
+
+# Temporary files
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# Logs
+*.log
