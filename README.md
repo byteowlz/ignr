@@ -1,100 +1,108 @@
-# Rust CLI Template
+# ignr
 
-This repository provides a batteries-included starting point for building cross-platform Rust CLIs. It is designed to be opinionated about developer experience while remaining easy to extend.
+Auto-detect languages and tools in your project and generate a `.gitignore` file with the right patterns.
 
-## Quick Start
-
-- Install the latest stable Rust toolchain (`rustup default stable`).
-- Fetch dependencies and verify the build:
-
-  ```bash
-  cargo test
-  ```
-
-- Run the CLI in place:
-
-  ```bash
-  cargo run -- run
-  ```
-
-- Scaffold a fresh project from this template:
-
-  ```bash
-  scripts/new-cli.sh my-cli
-  ```
-
-  ```powershell
-  pwsh scripts/new-cli.ps1 my-cli
-  ```
-
-## Features
-
-- `clap`-powered command interface with shared global flags (`-q`, `-v`, `--debug`, `--trace`, `--json`, `--yaml`, `--no-color`, `--dry-run`, `--yes`).
-- `config`-based configuration loader that creates `$XDG_CONFIG_HOME/ignr/config.toml` (or platform equivalents) on first run.
-- Environment overrides using the `IGNR__*` prefix; e.g. `IGNR__LOGGING__LEVEL=debug`.
-- Configurable data and state directories that honor XDG locations on Unix and the appropriate directories on Windows.
-- Shell completion generation via `cargo run -- completions <shell>`.
-- Logging, runtime limits, and diagnostics output ready to customize for your workflow.
-- `scripts/new-cli.sh` to clone the template with a new crate name and paths.
-
-## CLI Overview
+## Installation
 
 ```bash
-cargo run -- --help
+cargo install --path .
 ```
 
-Key subcommands:
+## Usage
 
-- `run [TASK]` – executes the primary workflow with optional profile overrides.
-- `init` – creates or refreshes the config file (use `--force` or `--yes` to overwrite).
-- `config show|path|reset` – inspects the effective configuration.
-- `completions <shell>` – emits shell completions to stdout (`bash`, `zsh`, `fish`, `powershell`, `elvish`).
+```bash
+# Auto-detect stack and generate .gitignore in current directory
+ignr generate
 
-Global flags apply to every subcommand, enabling quiet mode, stacked verbosity (`-vv`), trace logging, dry runs, JSON/YAML output, color control, progress suppression, and timeouts.
+# Print to stdout instead of writing
+ignr generate --print
+
+# Append to existing .gitignore
+ignr generate --append
+
+# Add specific templates
+ignr generate --add terraform --add docker
+
+# Skip auto-detection, only use specified templates
+ignr generate --no-detect --add rust --add macos
+
+# Scan a specific directory
+ignr generate --dir /path/to/project
+```
+
+## Subcommands
+
+| Command                        | Description                                                                |
+| ------------------------------ | -------------------------------------------------------------------------- |
+| `generate` (alias: `gen`, `g`) | Auto-detect stack and generate `.gitignore`                                |
+| `list` (alias: `ls`)           | List available templates                                                   |
+| `sync`                         | Sync templates from remote source (gitignore.io)                           |
+| `init`                         | Create config directories and default config file                          |
+| `config show\|path\|reset`     | Inspect and manage configuration                                           |
+| `completions <shell>`          | Generate shell completions (`bash`, `zsh`, `fish`, `powershell`, `elvish`) |
+
+## Supported Technologies
+
+**Languages:** Rust, Python, Node.js, Go, Java, C#, C++, Ruby, Swift, Kotlin, PHP, Scala, Elixir, Haskell, Zig, Dart
+
+**Tools:** Terraform, Ansible, Docker
+
+**IDEs/Editors:** VS Code, IntelliJ, Vim, Emacs
+
+**Operating Systems:** Linux, macOS, Windows
+
+## Global Flags
+
+| Flag                            | Description                           |
+| ------------------------------- | ------------------------------------- |
+| `-q`, `--quiet`                 | Reduce output to only errors          |
+| `-v`, `--verbose`               | Increase verbosity (stackable: `-vv`) |
+| `--debug`                       | Enable debug logging                  |
+| `--trace`                       | Enable trace logging                  |
+| `--json`                        | Output machine-readable JSON          |
+| `--yaml`                        | Output machine-readable YAML          |
+| `--no-color`                    | Disable ANSI colors                   |
+| `--color <auto\|always\|never>` | Control color output                  |
+| `--dry-run`                     | Do not change anything on disk        |
+| `-y`, `--yes`                   | Assume "yes" for interactive prompts  |
+| `--config <path>`               | Override the config file path         |
 
 ## Configuration
 
-- Default config path: `$XDG_CONFIG_HOME/ignr/config.toml` (or `%APPDATA%\ignr\config.toml` on Windows). Override with `--config <path>`.
-- Sample configuration with inline comments is available at `examples/config.toml`.
-- Data and state directories default to `$XDG_DATA_HOME/ignr` and `$XDG_STATE_HOME/ignr` (falling back to `~/.local/share` and `~/.local/state` when unset). Override inside the config file.
-- Values support `~` expansion and environment variables (e.g. `$HOME/logs/app.log`).
+Config file path: `$XDG_CONFIG_HOME/ignr/config.toml` (falls back to `~/.config/ignr/config.toml`).
 
-## Development Workflow
+A default config is created on first run. See `examples/config.toml` for all options.
 
-- Format the codebase:
+Environment overrides use the `IGNR__` prefix with `__` as separator:
 
-  ```bash
-  cargo fmt
-  ```
+```bash
+IGNR__DETECTION__MAX_DEPTH=5 ignr generate
+```
 
-- Run the test suite:
+### Config Options
 
-  ```bash
-  cargo test
-  ```
+```toml
+[templates]
+template_dir = "~/.config/ignr/templates"  # Custom templates directory
+template_url = "https://www.toptal.com/developers/gitignore/api"
+prefer_local = true
+always_include = ["macos", "vscode"]  # Always add these templates
 
-- Recommended lint pass during active development:
+[detection]
+max_depth = 10      # Directory scan depth
+detect_os = true    # Add OS-specific patterns
+detect_ide = true   # Detect IDE directories
 
-  ```bash
-  cargo clippy --all-targets --all-features
-  ```
+[paths]
+data_dir = "~/.local/share/ignr"
+cache_dir = "~/.cache/ignr"
+```
 
-- Generate completions for your shell:
+## Development
 
-  ```bash
-  cargo run -- completions bash > target/ignr.bash
-  ```
-
-## Scaffold New Projects
-
-- Run `scripts/new-cli.sh my-cli` (Unix shells) or `pwsh scripts/new-cli.ps1 my-cli` (Windows/PowerShell) to copy the template into `./my-cli` with all configuration files updated to the new crate name.
-- Provide `--path /some/where` (or `-Path C:\work\my-cli`) to choose a different destination directory.
-- Requirements: `python3` for the shell script, PowerShell 7 (`pwsh`) for the Windows script.
-
-## Project Structure
-
-- `src/main.rs` – CLI entry point, argument parsing, config loading, and command handlers.
-- `examples/config.toml` – commented configuration template.
-- `Cargo.toml` – dependencies and metadata for the template crate.
-
-Feel free to fork this template and tailor the commands, config schema, or runtime behavior to your project's needs.
+```bash
+cargo fmt           # Format code
+cargo test          # Run tests
+cargo clippy        # Lint
+cargo run -- --help # Run locally
+```
