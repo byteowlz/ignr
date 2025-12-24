@@ -158,7 +158,7 @@ struct GenerateCommand {
     /// Print to stdout instead of writing to .gitignore
     #[arg(long, short = 'p')]
     print: bool,
-    /// Append to existing .gitignore instead of replacing managed section
+    /// Force append (add duplicate managed section instead of updating existing one)
     #[arg(long, short = 'a')]
     append: bool,
     /// Skip auto-detection, only use explicitly specified templates
@@ -779,31 +779,34 @@ fn handle_generate(ctx: &RuntimeContext, cmd: GenerateCommand) -> Result<()> {
         return Ok(());
     }
 
-    // Handle append mode
-    let final_content = if cmd.append && gitignore_path.exists() {
-        let existing = fs::read_to_string(&gitignore_path)
-            .context("reading existing .gitignore")?;
-        format!("{existing}\n{full_content}")
-    } else if gitignore_path.exists() {
-        // Replace managed section
+    // Handle writing to .gitignore
+    // Default behavior: preserve existing content and append/update managed section
+    let final_content = if gitignore_path.exists() {
         let existing = fs::read_to_string(&gitignore_path)
             .context("reading existing .gitignore")?;
         
-        // Look for existing ignr section and replace it
-        if let Some(start) = existing.find("# ---- ignr (detected:") {
-            let before = &existing[..start];
-            // Find end of ignr section (next non-ignr header or end of file)
-            let after_start = &existing[start..];
-            let end = after_start
-                .find("\n# ----")
-                .filter(|&pos| !after_start[pos + 1..].starts_with("--- ignr"))
-                .map(|pos| start + pos + 1)
-                .unwrap_or(existing.len());
-            
-            let after = if end < existing.len() { &existing[end..] } else { "" };
-            format!("{before}{full_content}{after}")
-        } else {
+        if cmd.append {
+            // Pure append mode: always add to end, even if managed section exists
             format!("{existing}\n{full_content}")
+        } else if let Some(start) = existing.find("# ---- ignr (detected:") {
+            // Replace existing managed section only
+            let before = &existing[..start];
+            // The managed section extends to EOF since we don't have an end marker
+            // Future improvement: add end marker like "# ---- /ignr ----"
+            let before_trimmed = before.trim_end();
+            if before_trimmed.is_empty() {
+                full_content
+            } else {
+                format!("{before_trimmed}\n\n{full_content}")
+            }
+        } else {
+            // No existing managed section: append to existing content
+            let existing_trimmed = existing.trim_end();
+            if existing_trimmed.is_empty() {
+                full_content
+            } else {
+                format!("{existing_trimmed}\n\n{full_content}")
+            }
         }
     } else {
         full_content
