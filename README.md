@@ -4,6 +4,31 @@ Auto-detect languages and tools in your project and generate a `.gitignore` file
 
 ## Installation
 
+### Package Managers
+
+**Homebrew (macOS and Linux)**
+```bash
+brew tap byteowlz/tap
+brew install ignr
+```
+
+**Arch Linux (AUR)**
+```bash
+yay -S ignr
+```
+
+**Scoop (Windows)**
+```bash
+scoop bucket add byteowlz https://github.com/byteowlz/scoop-bucket
+scoop install ignr
+```
+
+### Pre-built Binaries
+
+Download from [GitHub Releases](https://github.com/byteowlz/ignr/releases).
+
+### Build from Source
+
 ```bash
 cargo install --path .
 ```
