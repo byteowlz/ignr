@@ -35,7 +35,10 @@ const EMBEDDED_TEMPLATES: &[(&str, &str)] = &[
     ("haskell", include_str!("../templates/haskell.gitignore")),
     ("zig", include_str!("../templates/zig.gitignore")),
     ("dart", include_str!("../templates/dart.gitignore")),
-    ("terraform", include_str!("../templates/terraform.gitignore")),
+    (
+        "terraform",
+        include_str!("../templates/terraform.gitignore"),
+    ),
     ("ansible", include_str!("../templates/ansible.gitignore")),
     ("docker", include_str!("../templates/docker.gitignore")),
     ("vscode", include_str!("../templates/vscode.gitignore")),
@@ -245,15 +248,13 @@ impl RuntimeContext {
             return Ok(());
         }
 
-        fs::create_dir_all(&templates_dir).with_context(|| {
-            format!("creating templates directory {}", templates_dir.display())
-        })?;
+        fs::create_dir_all(&templates_dir)
+            .with_context(|| format!("creating templates directory {}", templates_dir.display()))?;
 
         for (name, content) in EMBEDDED_TEMPLATES {
             let path = templates_dir.join(format!("{name}.gitignore"));
-            fs::write(&path, content).with_context(|| {
-                format!("writing embedded template {}", path.display())
-            })?;
+            fs::write(&path, content)
+                .with_context(|| format!("writing embedded template {}", path.display()))?;
             debug!("Wrote embedded template: {name}");
         }
 
@@ -329,7 +330,10 @@ impl RuntimeContext {
             format!("creating data directory {}", self.paths.data_dir.display())
         })?;
         fs::create_dir_all(&self.paths.cache_dir).with_context(|| {
-            format!("creating cache directory {}", self.paths.cache_dir.display())
+            format!(
+                "creating cache directory {}",
+                self.paths.cache_dir.display()
+            )
         })?;
         Ok(())
     }
@@ -452,7 +456,11 @@ struct PathsConfig {
 }
 
 /// Detects technologies used in a directory
-fn detect_technologies(dir: &Path, config: &DetectionConfig, depth: usize) -> Result<BTreeSet<String>> {
+fn detect_technologies(
+    dir: &Path,
+    config: &DetectionConfig,
+    depth: usize,
+) -> Result<BTreeSet<String>> {
     let mut detected = BTreeSet::new();
 
     let walker = WalkBuilder::new(dir)
@@ -467,13 +475,21 @@ fn detect_technologies(dir: &Path, config: &DetectionConfig, depth: usize) -> Re
 
         // Detect by manifest files
         match file_name {
-            "Cargo.toml" => { detected.insert("rust".to_string()); }
-            "package.json" => { detected.insert("node".to_string()); }
+            "Cargo.toml" => {
+                detected.insert("rust".to_string());
+            }
+            "package.json" => {
+                detected.insert("node".to_string());
+            }
             "requirements.txt" | "pyproject.toml" | "setup.py" | "Pipfile" | "uv.lock" => {
                 detected.insert("python".to_string());
             }
-            "go.mod" | "go.sum" => { detected.insert("go".to_string()); }
-            "pom.xml" | "build.gradle" => { detected.insert("java".to_string()); }
+            "go.mod" | "go.sum" => {
+                detected.insert("go".to_string());
+            }
+            "pom.xml" | "build.gradle" => {
+                detected.insert("java".to_string());
+            }
             "build.gradle.kts" => {
                 detected.insert("java".to_string());
                 // Check if this is a Kotlin project
@@ -481,17 +497,39 @@ fn detect_technologies(dir: &Path, config: &DetectionConfig, depth: usize) -> Re
                     detected.insert("kotlin".to_string());
                 }
             }
-            "CMakeLists.txt" | "Makefile" | "configure.ac" => { detected.insert("cpp".to_string()); }
-            "Gemfile" | "Rakefile" => { detected.insert("ruby".to_string()); }
-            "Package.swift" => { detected.insert("swift".to_string()); }
-            "composer.json" => { detected.insert("php".to_string()); }
-            "build.sbt" => { detected.insert("scala".to_string()); }
-            "mix.exs" => { detected.insert("elixir".to_string()); }
-            "stack.yaml" | "cabal.project" => { detected.insert("haskell".to_string()); }
-            "build.zig" => { detected.insert("zig".to_string()); }
-            "pubspec.yaml" => { detected.insert("dart".to_string()); }
-            "main.tf" | "terraform.tf" => { detected.insert("terraform".to_string()); }
-            "playbook.yml" | "ansible.cfg" => { detected.insert("ansible".to_string()); }
+            "CMakeLists.txt" | "Makefile" | "configure.ac" => {
+                detected.insert("cpp".to_string());
+            }
+            "Gemfile" | "Rakefile" => {
+                detected.insert("ruby".to_string());
+            }
+            "Package.swift" => {
+                detected.insert("swift".to_string());
+            }
+            "composer.json" => {
+                detected.insert("php".to_string());
+            }
+            "build.sbt" => {
+                detected.insert("scala".to_string());
+            }
+            "mix.exs" => {
+                detected.insert("elixir".to_string());
+            }
+            "stack.yaml" | "cabal.project" => {
+                detected.insert("haskell".to_string());
+            }
+            "build.zig" => {
+                detected.insert("zig".to_string());
+            }
+            "pubspec.yaml" => {
+                detected.insert("dart".to_string());
+            }
+            "main.tf" | "terraform.tf" => {
+                detected.insert("terraform".to_string());
+            }
+            "playbook.yml" | "ansible.cfg" => {
+                detected.insert("ansible".to_string());
+            }
             "Dockerfile" | "docker-compose.yml" | "docker-compose.yaml" => {
                 detected.insert("docker".to_string());
             }
@@ -501,24 +539,60 @@ fn detect_technologies(dir: &Path, config: &DetectionConfig, depth: usize) -> Re
         // Detect by file extension
         if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
             match ext {
-                "rs" => { detected.insert("rust".to_string()); }
-                "py" | "pyw" | "pyi" => { detected.insert("python".to_string()); }
-                "js" | "jsx" | "ts" | "tsx" | "mjs" | "cjs" => { detected.insert("node".to_string()); }
-                "go" => { detected.insert("go".to_string()); }
-                "java" => { detected.insert("java".to_string()); }
-                "cs" | "fs" | "vb" => { detected.insert("csharp".to_string()); }
-                "c" | "cpp" | "cc" | "cxx" | "h" | "hpp" | "hxx" => { detected.insert("cpp".to_string()); }
-                "rb" => { detected.insert("ruby".to_string()); }
-                "swift" => { detected.insert("swift".to_string()); }
-                "kt" | "kts" => { detected.insert("kotlin".to_string()); }
-                "php" => { detected.insert("php".to_string()); }
-                "scala" | "sc" => { detected.insert("scala".to_string()); }
-                "ex" | "exs" => { detected.insert("elixir".to_string()); }
-                "hs" | "lhs" => { detected.insert("haskell".to_string()); }
-                "zig" => { detected.insert("zig".to_string()); }
-                "dart" => { detected.insert("dart".to_string()); }
-                "tf" | "tfvars" => { detected.insert("terraform".to_string()); }
-                "csproj" | "sln" | "fsproj" => { detected.insert("csharp".to_string()); }
+                "rs" => {
+                    detected.insert("rust".to_string());
+                }
+                "py" | "pyw" | "pyi" => {
+                    detected.insert("python".to_string());
+                }
+                "js" | "jsx" | "ts" | "tsx" | "mjs" | "cjs" => {
+                    detected.insert("node".to_string());
+                }
+                "go" => {
+                    detected.insert("go".to_string());
+                }
+                "java" => {
+                    detected.insert("java".to_string());
+                }
+                "cs" | "fs" | "vb" => {
+                    detected.insert("csharp".to_string());
+                }
+                "c" | "cpp" | "cc" | "cxx" | "h" | "hpp" | "hxx" => {
+                    detected.insert("cpp".to_string());
+                }
+                "rb" => {
+                    detected.insert("ruby".to_string());
+                }
+                "swift" => {
+                    detected.insert("swift".to_string());
+                }
+                "kt" | "kts" => {
+                    detected.insert("kotlin".to_string());
+                }
+                "php" => {
+                    detected.insert("php".to_string());
+                }
+                "scala" | "sc" => {
+                    detected.insert("scala".to_string());
+                }
+                "ex" | "exs" => {
+                    detected.insert("elixir".to_string());
+                }
+                "hs" | "lhs" => {
+                    detected.insert("haskell".to_string());
+                }
+                "zig" => {
+                    detected.insert("zig".to_string());
+                }
+                "dart" => {
+                    detected.insert("dart".to_string());
+                }
+                "tf" | "tfvars" => {
+                    detected.insert("terraform".to_string());
+                }
+                "csproj" | "sln" | "fsproj" => {
+                    detected.insert("csharp".to_string());
+                }
                 _ => {}
             }
         }
@@ -526,10 +600,18 @@ fn detect_technologies(dir: &Path, config: &DetectionConfig, depth: usize) -> Re
         // Detect IDE/editor directories
         if config.detect_ide && path.is_dir() {
             match file_name {
-                ".vscode" => { detected.insert("vscode".to_string()); }
-                ".idea" => { detected.insert("intellij".to_string()); }
-                ".vim" | ".nvim" => { detected.insert("vim".to_string()); }
-                ".emacs.d" => { detected.insert("emacs".to_string()); }
+                ".vscode" => {
+                    detected.insert("vscode".to_string());
+                }
+                ".idea" => {
+                    detected.insert("intellij".to_string());
+                }
+                ".vim" | ".nvim" => {
+                    detected.insert("vim".to_string());
+                }
+                ".emacs.d" => {
+                    detected.insert("emacs".to_string());
+                }
                 _ => {}
             }
         }
@@ -637,7 +719,10 @@ impl<'a> TemplateManager<'a> {
     }
 
     fn load_from_data_dir(&self, name: &str) -> Option<String> {
-        let path = self.data_dir.join("templates").join(format!("{name}.gitignore"));
+        let path = self
+            .data_dir
+            .join("templates")
+            .join(format!("{name}.gitignore"));
         fs::read_to_string(path).ok()
     }
 
@@ -721,14 +806,19 @@ fn handle_generate(ctx: &RuntimeContext, cmd: GenerateCommand) -> Result<()> {
 
     if templates.is_empty() {
         if ctx.common.json {
-            println!("{}", serde_json::json!({
-                "detected": [],
-                "message": "No technologies detected and none specified"
-            }));
+            println!(
+                "{}",
+                serde_json::json!({
+                    "detected": [],
+                    "message": "No technologies detected and none specified"
+                })
+            );
         } else if ctx.common.yaml {
             println!("detected: []\nmessage: No technologies detected and none specified");
         } else {
-            println!("No technologies detected and none specified. Use --add to specify templates.");
+            println!(
+                "No technologies detected and none specified. Use --add to specify templates."
+            );
         }
         return Ok(());
     }
@@ -740,19 +830,19 @@ fn handle_generate(ctx: &RuntimeContext, cmd: GenerateCommand) -> Result<()> {
     // Generate header
     let date = Utc::now().format("%Y-%m-%d");
     let detected_str = template_list.join(",");
-    let header = format!(
-        "# ---- ignr (detected: {}) @ {} ----\n",
-        detected_str, date
-    );
+    let header = format!("# ---- ignr (detected: {}) @ {} ----\n", detected_str, date);
 
     let full_content = format!("{header}\n{content}");
 
     if cmd.print {
         if ctx.common.json {
-            println!("{}", serde_json::json!({
-                "detected": template_list,
-                "content": full_content
-            }));
+            println!(
+                "{}",
+                serde_json::json!({
+                    "detected": template_list,
+                    "content": full_content
+                })
+            );
         } else if ctx.common.yaml {
             println!("detected:");
             for t in &template_list {
@@ -771,7 +861,10 @@ fn handle_generate(ctx: &RuntimeContext, cmd: GenerateCommand) -> Result<()> {
     let gitignore_path = dir.join(".gitignore");
 
     if ctx.common.dry_run {
-        info!("dry-run: would write .gitignore to {}", gitignore_path.display());
+        info!(
+            "dry-run: would write .gitignore to {}",
+            gitignore_path.display()
+        );
         if ctx.common.verbose > 0 {
             println!("Detected: {}", template_list.join(", "));
             println!("Would write to: {}", gitignore_path.display());
@@ -782,9 +875,9 @@ fn handle_generate(ctx: &RuntimeContext, cmd: GenerateCommand) -> Result<()> {
     // Handle writing to .gitignore
     // Default behavior: preserve existing content and append/update managed section
     let final_content = if gitignore_path.exists() {
-        let existing = fs::read_to_string(&gitignore_path)
-            .context("reading existing .gitignore")?;
-        
+        let existing =
+            fs::read_to_string(&gitignore_path).context("reading existing .gitignore")?;
+
         if cmd.append {
             // Pure append mode: always add to end, even if managed section exists
             format!("{existing}\n{full_content}")
@@ -823,19 +916,25 @@ fn handle_generate(ctx: &RuntimeContext, cmd: GenerateCommand) -> Result<()> {
 }
 
 fn handle_sync(ctx: &RuntimeContext, cmd: SyncCommand) -> Result<()> {
-    let url = cmd.url
+    let url = cmd
+        .url
         .or_else(|| ctx.config.templates.template_url.clone())
-        .ok_or_else(|| anyhow!("No template URL configured. Set templates.template_url in config or use --url"))?;
+        .ok_or_else(|| {
+            anyhow!("No template URL configured. Set templates.template_url in config or use --url")
+        })?;
 
     let templates_dir = ctx.paths.data_dir.join("templates");
 
     if ctx.common.dry_run {
-        info!("dry-run: would sync templates from {} to {}", url, templates_dir.display());
+        info!(
+            "dry-run: would sync templates from {} to {}",
+            url,
+            templates_dir.display()
+        );
         return Ok(());
     }
 
-    fs::create_dir_all(&templates_dir)
-        .context("creating templates data directory")?;
+    fs::create_dir_all(&templates_dir).context("creating templates data directory")?;
 
     // Fetch list of available templates
     let list_url = format!("{}/list", url.trim_end_matches('/'));
@@ -846,12 +945,16 @@ fn handle_sync(ctx: &RuntimeContext, cmd: SyncCommand) -> Result<()> {
         .build()
         .context("building HTTP client")?;
 
-    let response = client.get(&list_url)
+    let response = client
+        .get(&list_url)
         .send()
         .context("fetching template list")?;
 
     if !response.status().is_success() {
-        return Err(anyhow!("Failed to fetch template list: HTTP {}", response.status()));
+        return Err(anyhow!(
+            "Failed to fetch template list: HTTP {}",
+            response.status()
+        ));
     }
 
     let list_text = response.text().context("reading template list")?;
@@ -1080,51 +1183,50 @@ fn expand_str_path(text: &str) -> Result<PathBuf> {
     Ok(PathBuf::from(expanded.to_string()))
 }
 
+/// Zero-dependency base-directory resolution (option B).
+///
+/// An explicit, absolute `XDG_*` env var wins on every OS. Otherwise we use the
+/// canonical unix layout (`~/.config`, `~/.local/share`, `~/.cache`) on all unix
+/// platforms *including macOS* (deliberately not `~/Library`); on Windows we fall
+/// back to `%APPDATA%` / `%LOCALAPPDATA%`.
+fn resolve_base(
+    xdg: Option<PathBuf>,
+    home: Option<PathBuf>,
+    win_dir: Option<PathBuf>,
+    is_windows: bool,
+    unix_rel: &str,
+) -> Option<PathBuf> {
+    if let Some(p) = xdg.filter(|p| p.is_absolute()) {
+        return Some(p);
+    }
+    if is_windows {
+        win_dir
+    } else {
+        home.map(|h| h.join(unix_rel))
+    }
+}
+
+fn base_dir(xdg_var: &str, unix_rel: &str, win_var: &str) -> Result<PathBuf> {
+    resolve_base(
+        env::var_os(xdg_var).map(PathBuf::from),
+        env::var_os("HOME").map(PathBuf::from),
+        env::var_os(win_var).map(PathBuf::from),
+        cfg!(windows),
+        unix_rel,
+    )
+    .ok_or_else(|| anyhow!("unable to determine base directory ({xdg_var})"))
+}
+
 fn default_config_dir() -> Result<PathBuf> {
-    if let Some(dir) = env::var_os("XDG_CONFIG_HOME").filter(|v| !v.is_empty()) {
-        let mut path = PathBuf::from(dir);
-        path.push(APP_NAME);
-        return Ok(path);
-    }
-
-    if let Some(mut dir) = dirs::config_dir() {
-        dir.push(APP_NAME);
-        return Ok(dir);
-    }
-
-    dirs::home_dir()
-        .map(|home| home.join(".config").join(APP_NAME))
-        .ok_or_else(|| anyhow!("unable to determine configuration directory"))
+    Ok(base_dir("XDG_CONFIG_HOME", ".config", "APPDATA")?.join(APP_NAME))
 }
 
 fn default_data_dir() -> Result<PathBuf> {
-    if let Some(dir) = env::var_os("XDG_DATA_HOME").filter(|v| !v.is_empty()) {
-        return Ok(PathBuf::from(dir).join(APP_NAME));
-    }
-
-    if let Some(mut dir) = dirs::data_dir() {
-        dir.push(APP_NAME);
-        return Ok(dir);
-    }
-
-    dirs::home_dir()
-        .map(|home| home.join(".local/share").join(APP_NAME))
-        .ok_or_else(|| anyhow!("unable to determine data directory"))
+    Ok(base_dir("XDG_DATA_HOME", ".local/share", "APPDATA")?.join(APP_NAME))
 }
 
 fn default_cache_dir() -> Result<PathBuf> {
-    if let Some(dir) = env::var_os("XDG_CACHE_HOME").filter(|v| !v.is_empty()) {
-        return Ok(PathBuf::from(dir).join(APP_NAME));
-    }
-
-    if let Some(mut dir) = dirs::cache_dir() {
-        dir.push(APP_NAME);
-        return Ok(dir);
-    }
-
-    dirs::home_dir()
-        .map(|home| home.join(".cache").join(APP_NAME))
-        .ok_or_else(|| anyhow!("unable to determine cache directory"))
+    Ok(base_dir("XDG_CACHE_HOME", ".cache", "LOCALAPPDATA")?.join(APP_NAME))
 }
 
 fn env_prefix() -> String {
@@ -1149,5 +1251,102 @@ impl fmt::Display for AppPaths {
             self.data_dir.display(),
             self.cache_dir.display(),
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::resolve_base;
+    use std::path::PathBuf;
+
+    #[test]
+    fn absolute_xdg_wins_on_unix() {
+        let got = resolve_base(
+            Some(PathBuf::from("/explicit/xdg")),
+            Some(PathBuf::from("/home/user")),
+            None,
+            false,
+            ".config",
+        );
+        assert_eq!(got, Some(PathBuf::from("/explicit/xdg")));
+    }
+
+    #[test]
+    fn absolute_xdg_wins_on_windows() {
+        let got = resolve_base(
+            Some(PathBuf::from("/explicit/xdg")),
+            None,
+            Some(PathBuf::from("C:\\AppData")),
+            true,
+            ".config",
+        );
+        assert_eq!(got, Some(PathBuf::from("/explicit/xdg")));
+    }
+
+    #[test]
+    fn relative_xdg_is_ignored() {
+        let got = resolve_base(
+            Some(PathBuf::from("relative/xdg")),
+            Some(PathBuf::from("/home/user")),
+            None,
+            false,
+            ".config",
+        );
+        assert_eq!(got, Some(PathBuf::from("/home/user/.config")));
+    }
+
+    #[test]
+    fn empty_xdg_is_ignored() {
+        // An empty env var maps to an empty PathBuf, which is not absolute.
+        let got = resolve_base(
+            Some(PathBuf::new()),
+            Some(PathBuf::from("/home/user")),
+            None,
+            false,
+            ".local/share",
+        );
+        assert_eq!(got, Some(PathBuf::from("/home/user/.local/share")));
+    }
+
+    #[test]
+    fn unix_uses_home_relative_even_on_macos_layout() {
+        let got = resolve_base(
+            None,
+            Some(PathBuf::from("/Users/me")),
+            None,
+            false,
+            ".cache",
+        );
+        assert_eq!(got, Some(PathBuf::from("/Users/me/.cache")));
+    }
+
+    #[test]
+    fn windows_uses_win_dir() {
+        let got = resolve_base(
+            None,
+            Some(PathBuf::from("/home/user")),
+            Some(PathBuf::from("C:\\Users\\me\\AppData\\Roaming")),
+            true,
+            ".config",
+        );
+        assert_eq!(got, Some(PathBuf::from("C:\\Users\\me\\AppData\\Roaming")));
+    }
+
+    #[test]
+    fn unix_without_home_is_none() {
+        let got = resolve_base(None, None, None, false, ".config");
+        assert_eq!(got, None);
+    }
+
+    #[test]
+    fn windows_without_win_dir_is_none() {
+        let got = resolve_base(
+            None,
+            Some(PathBuf::from("/home/user")),
+            None,
+            true,
+            ".config",
+        );
+        assert_eq!(got, None);
     }
 }
