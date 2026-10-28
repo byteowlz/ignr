@@ -1,8 +1,12 @@
 set positional-arguments
 
-# Display help
-help:
-    just -l
+# List available recipes
+default:
+    @just --list
+
+# Fast compile check
+check:
+    cargo check --all-features
 
 # format code
 fmt:

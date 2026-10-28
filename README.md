@@ -126,8 +126,9 @@ cache_dir = "~/.cache/ignr"
 ## Development
 
 ```bash
-cargo fmt           # Format code
-cargo test          # Run tests
-cargo clippy        # Lint
-cargo run -- --help # Run locally
+just            # List recipes
+just check      # Fast compile check
+just fmt        # Format code
+just clippy     # Lint
+just test       # Run tests (cargo-nextest)
 ```
