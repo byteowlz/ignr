@@ -1249,6 +1249,19 @@ mod tests {
     use std::path::PathBuf;
 
     #[test]
+    fn python_template_lib_patterns_are_root_anchored() {
+        // Regression: unanchored lib/ and lib64/ over-ignore application
+        // source directories (e.g. app/src/lib/) in polyglot projects that
+        // pull in the python template.
+        let template = include_str!("../templates/python.gitignore");
+        let lines: Vec<&str> = template.lines().map(str::trim).collect();
+        assert!(!lines.contains(&"lib/"));
+        assert!(!lines.contains(&"lib64/"));
+        assert!(lines.contains(&"/lib/"));
+        assert!(lines.contains(&"/lib64/"));
+    }
+
+    #[test]
     fn absolute_xdg_wins_on_unix() {
         let got = resolve_base(
             Some(PathBuf::from("/explicit/xdg")),
