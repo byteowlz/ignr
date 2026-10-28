@@ -52,5 +52,5 @@ tarpaulin-report.html
 # Benchmarks
 criterion/
 # IDE/Editor specific (Rust)
-.cargo/
-!.cargo/config.toml
+**/.cargo/*
+!**/.cargo/config.toml

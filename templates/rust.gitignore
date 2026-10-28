@@ -26,5 +26,5 @@ tarpaulin-report.html
 criterion/
 
 # IDE/Editor specific (Rust)
-.cargo/
-!.cargo/config.toml
+**/.cargo/*
+!**/.cargo/config.toml
