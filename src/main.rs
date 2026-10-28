@@ -385,22 +385,12 @@ impl AppPaths {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
 struct AppConfig {
     templates: TemplatesConfig,
     detection: DetectionConfig,
     paths: PathsConfig,
-}
-
-impl Default for AppConfig {
-    fn default() -> Self {
-        Self {
-            templates: TemplatesConfig::default(),
-            detection: DetectionConfig::default(),
-            paths: PathsConfig::default(),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -648,17 +638,16 @@ impl<'a> TemplateManager<'a> {
             .collect();
 
         // Add templates from custom directory
-        if let Some(ref dir) = self.config.templates.template_dir {
-            if let Ok(expanded) = expand_str_path(dir) {
-                if let Ok(entries) = fs::read_dir(expanded) {
-                    for entry in entries.flatten() {
-                        let path = entry.path();
-                        if let Some(name) = path.file_stem().and_then(|n| n.to_str()) {
-                            if path.extension().and_then(|e| e.to_str()) == Some("gitignore") {
-                                templates.insert(name.to_string());
-                            }
-                        }
-                    }
+        if let Some(ref dir) = self.config.templates.template_dir
+            && let Ok(expanded) = expand_str_path(dir)
+            && let Ok(entries) = fs::read_dir(expanded)
+        {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if let Some(name) = path.file_stem().and_then(|n| n.to_str())
+                    && path.extension().and_then(|e| e.to_str()) == Some("gitignore")
+                {
+                    templates.insert(name.to_string());
                 }
             }
         }
@@ -668,10 +657,10 @@ impl<'a> TemplateManager<'a> {
         if let Ok(entries) = fs::read_dir(&data_templates) {
             for entry in entries.flatten() {
                 let path = entry.path();
-                if let Some(name) = path.file_stem().and_then(|n| n.to_str()) {
-                    if path.extension().and_then(|e| e.to_str()) == Some("gitignore") {
-                        templates.insert(name.to_string());
-                    }
+                if let Some(name) = path.file_stem().and_then(|n| n.to_str())
+                    && path.extension().and_then(|e| e.to_str()) == Some("gitignore")
+                {
+                    templates.insert(name.to_string());
                 }
             }
         }
@@ -683,10 +672,10 @@ impl<'a> TemplateManager<'a> {
         let name_lower = name.to_lowercase();
 
         // Check custom template directory first if prefer_local is true
-        if self.config.templates.prefer_local {
-            if let Some(content) = self.load_from_custom_dir(&name_lower) {
-                return Some(content);
-            }
+        if self.config.templates.prefer_local
+            && let Some(content) = self.load_from_custom_dir(&name_lower)
+        {
+            return Some(content);
         }
 
         // Check data directory (synced templates)
@@ -702,10 +691,10 @@ impl<'a> TemplateManager<'a> {
         }
 
         // Check custom directory if not checked yet
-        if !self.config.templates.prefer_local {
-            if let Some(content) = self.load_from_custom_dir(&name_lower) {
-                return Some(content);
-            }
+        if !self.config.templates.prefer_local
+            && let Some(content) = self.load_from_custom_dir(&name_lower)
+        {
+            return Some(content);
         }
 
         None
